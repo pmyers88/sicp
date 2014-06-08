@@ -72,7 +72,6 @@
     (combiner (term a) (accumulate combiner null-value term (next a) next b))))
 
 ; Exercise 1.33
-
 ; Write a filtered-accumulate abstraction takes the same arguments
 ; as accumulate, together with an additional predicate of one argument that
 ; specifies the filter.
@@ -91,3 +90,111 @@
 (define (prod-relative-primes n)
   (define (predicate i) (relative-prime? i n))
   (filtered-accumulate * predicate 1 identity 1 inc (- n 1)))
+
+; Exercise 1.34
+; Suppose we define the procedure
+(define (f g)
+  (g 2))
+; Then we have
+(f square)
+; 4
+(f (lambda (z) (* z (+ z 1))))
+; 6
+; What happens if we (perversely) ask the interpreter to evaluate the
+; combination (f f)? Explain.
+; (f f)
+; (f (f 2))
+; (f (2 2))
+
+; Find roots using the midpoint formula
+(define (average x y)
+  (/ (+ x y) 2.0))
+
+(define (search f a b)
+  (let ((possible-zero (average a b)))
+    (cond ((< (abs (f possible-zero)) .001) possible-zero)
+      ((< (f possible-zero) 0) (search f possible-zero b))
+      (else (search f a possible-zero)))))
+
+(define (half-interval-method f a b)
+  (let ((a-value (f a))
+        (b-value (f b)))
+    (cond ((and (negative? a-value) (positive? b-value))
+           (search f a b))
+          ((and (negative? b-value) (positive? a-value))
+           (search f b a))
+          (else
+           (error "Values are not of opposite sign" a b)))))
+
+(define tolerance 0.00001)
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (newline)
+    (display guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+        next
+        (try next))))
+  (try first-guess))
+
+; Exercise 1.35
+; Show that the goldon ration is a fixed point of the transformation 
+; x -> 1 + 1/x and use this fact to compute it by the fixed-point procedure.
+(fixed-point (lambda (x) (+ 1 (/ 1 x))) 1.0) 
+
+; Exercise 1.36
+
+; Modify fixed-point so that it prints the sequence of approximations it
+; generates, using the newline and display primitives shown in exercise 1.22.
+; Then find a solution to x^x = 1000 by finding a fixed point of x
+; log(1000)/log(x). (Use Scheme's primitive log procedure, which computes
+; natural logarithms.) Compare the number of steps this takes with and without
+; average damping. (Note that you cannot start fixed-point with a guess of 1, as
+; this would cause division by log(1) = 0.)
+
+; damped
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (newline)
+    (display guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+        next
+        (try (average guess next)))))
+  (try first-guess))
+
+(fixed-point (lambda (x) (/ (log 1000) (log x))) 2.0)
+; took 10 guesses with an initial guess of 2
+
+; non-damped
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (newline)
+    (display guess)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+        next
+        (try next))))
+  (try first-guess))
+
+(fixed-point (lambda (x) (/ (log 1000) (log x))) 2.0)
+; took many more guesses due to oscillations
+
+; Exercise 1.37 
+; Write a k-term finite continued fraction function
+(define (cont-frac n d k)
+  (define (cont-frac-inner i result)
+    (newline)
+    (display result)
+    (let ((current-result (/ (n i) (+ (d i) result))))
+      (if (= i 1)
+        current-result
+      (cont-frac-inner (- i 1) current-result))))
+  (cont-frac-inner k 0))
+    
