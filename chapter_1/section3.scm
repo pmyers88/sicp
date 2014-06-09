@@ -211,6 +211,6 @@
     1))
 (cont-frac (lambda (i) 1) euler-d 10)
 (define (tan-cf x k)
-  (cont-frac (lambda (i) (- (* i 2) 1)) 
-             (lambda (i) (if (= i 1) x (* -1.0 (square x))))
+  (cont-frac (lambda (i) (if (= i 1) x (* -1.0 (square x))))
+             (lambda (i) (- (* i 2) 1))
              k))
