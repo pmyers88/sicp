@@ -192,9 +192,25 @@
   (define (cont-frac-inner i result)
     (newline)
     (display result)
+    (newline)
+    (display (n i))
+    (newline)
+    (display (d i))
     (let ((current-result (/ (n i) (+ (d i) result))))
       (if (= i 1)
         current-result
       (cont-frac-inner (- i 1) current-result))))
   (cont-frac-inner k 0))
-    
+
+; Exercise 1.38
+; continued fraction for e - 2; n(i) are all 1; D(i) are successively
+; 1, 2, 1, 1, 4, 1, 1, 6, 1, 1, 8, 1, 1, 10 ...
+(define (euler-d i)
+  (if (= (modulo (+ i 1) 3) 0)
+    (* 2 (+ 1 (floor (/ i 3))))
+    1))
+(cont-frac (lambda (i) 1) euler-d 10)
+(define (tan-cf x k)
+  (cont-frac (lambda (i) (- (* i 2) 1)) 
+             (lambda (i) (if (= i 1) x (* -1.0 (square x))))
+             k))
